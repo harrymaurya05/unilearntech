@@ -2,7 +2,6 @@ package com.unilearntech.unilearntech.utils.activemq;
 
 
 import com.google.gson.Gson;
-import com.unilearntech.unilearntech.security.jwt.JwtUtils;
 import com.unilearntech.unilearntech.service.file.FileStoreService;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -13,15 +12,14 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PrefetchInvoiceListener {
+public class VideoEncodingListener {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(VideoEncodingListener.class);
     @Autowired FileStoreService fileStoreService;
-//    @Autowired
-//    private FlipkartSmartService flipkartSmartService;
+
 
     @JmsListener(destination = "video-encode", concurrency = "${spring.activemq.craete-job.listener.concurrency:5}")
-    public void prefetchInvoice(final Message message) throws JMSException {
+    public void videoEncoding(final Message message) throws JMSException {
         try {
             logger.info("Message Received:{}", message);
             boolean contextSuccess = setupContext(message);
@@ -29,14 +27,13 @@ public class PrefetchInvoiceListener {
                 logger.error("Invalid message context headers");
                 return;
             }
-            processPrefetchRequest(message);
+            processVideoEncoding(message);
         } finally {
-//            FlipkartSmartRequestContext.destroy();
-//            TenantRequestContext.destroy();
+
         }
     }
 
-    private void processPrefetchRequest(Message message) throws JMSException {
+    private void processVideoEncoding(Message message) throws JMSException {
         if (!(message instanceof TextMessage)) {
             logger.error("Message Received is not text message:{}", message);
             return;
@@ -49,7 +46,6 @@ public class PrefetchInvoiceListener {
             VideoEncodingEvent videoEncodingEvent = new Gson().fromJson(messageText, VideoEncodingEvent.class);
             logger.info("Video path from jsm video event : {}",videoEncodingEvent.getVideoPath());
             fileStoreService.encode(videoEncodingEvent);
-//            flipkartSmartService.createInvoice(createInvoiceRequest);
         } catch (Exception e) {
             logger.error("Exception while processing message", e);
         }

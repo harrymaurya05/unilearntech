@@ -8,16 +8,13 @@ import javax.persistence.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "channelOrderSyncStatus")
-public class VideoEncodingSyncStatusDTO implements Serializable {
+public class VideoEncodingSyncStatus implements Serializable {
 
     private static final long           serialVersionUID    = 8742974020680542729L;
 
     @Id
     private String                      id;
-
-    private String                      channelCode;
-    private String                      tenantCode;
-    private Channel.SyncExecutionStatus syncExecutionStatus = Channel.SyncExecutionStatus.IDLE;
+    private VideoEncodingStatus.SyncExecutionStatus syncExecutionStatus = VideoEncodingStatus.SyncExecutionStatus.IDLE;
     private String                      requestId;
     private String                      message;
     private long                        totalMileStones;
@@ -33,11 +30,11 @@ public class VideoEncodingSyncStatusDTO implements Serializable {
     private Date                        created;
     private Date                        lastMileStoneUpdateTime;
 
-    public VideoEncodingSyncStatusDTO() {
+    public VideoEncodingSyncStatus() {
 
         this.created = DateUtils.getCurrentTime();
     }
-    public VideoEncodingSyncStatusDTO(String requestId) {
+    public VideoEncodingSyncStatus(String requestId) {
 
         this.requestId = requestId;
     }
@@ -66,11 +63,11 @@ public class VideoEncodingSyncStatusDTO implements Serializable {
     }
 
 
-    public void setSyncExecutionStatus(Channel.SyncExecutionStatus syncExecutionStatus) {
+    public void setSyncExecutionStatus(VideoEncodingStatus.SyncExecutionStatus syncExecutionStatus) {
         this.syncExecutionStatus = syncExecutionStatus;
     }
 
-    public Channel.SyncExecutionStatus getSyncExecutionStatus() {
+    public VideoEncodingStatus.SyncExecutionStatus getSyncExecutionStatus() {
         return syncExecutionStatus;
     }
 
@@ -107,7 +104,7 @@ public class VideoEncodingSyncStatusDTO implements Serializable {
     }
 
     public void reset() {
-        syncExecutionStatus = Channel.SyncExecutionStatus.IDLE;
+        syncExecutionStatus = VideoEncodingStatus.SyncExecutionStatus.IDLE;
         message = null;
         totalMileStones = 0;
         currentMileStone = 0;
@@ -168,21 +165,6 @@ public class VideoEncodingSyncStatusDTO implements Serializable {
         this.lastSuccessfulOrderReceivedTime = lastSuccessfulOrderReceivedTime;
     }
 
-    public String getChannelCode() {
-        return channelCode;
-    }
-
-    public void setChannelCode(String channelCode) {
-        this.channelCode = channelCode;
-    }
-
-    public String getTenantCode() {
-        return tenantCode;
-    }
-
-    public void setTenantCode(String tenantCode) {
-        this.tenantCode = tenantCode;
-    }
 
     public boolean isLastSyncSuccessful() {
         return lastSyncSuccessful;

@@ -1,23 +1,31 @@
 package com.unilearntech.unilearntech.service.file;
 
-import com.unilearntech.unilearntech.models.Channel;
+import com.google.gson.Gson;
+import com.unilearntech.unilearntech.models.VideoEncodingStatus;
+import com.unilearntech.unilearntech.models.Error;
 import com.unilearntech.unilearntech.models.User;
 import com.unilearntech.unilearntech.models.Video;
-import com.unilearntech.unilearntech.models.VideoEncodingSyncStatusDTO;
+import com.unilearntech.unilearntech.models.VideoEncodingSyncStatus;
+import com.unilearntech.unilearntech.payload.request.FileStatusReqeust;
+import com.unilearntech.unilearntech.payload.response.FileStatusResponse;
+import com.unilearntech.unilearntech.payload.response.FileUploadResponse;
+import com.unilearntech.unilearntech.payload.response.GetVideoResponse;
+import com.unilearntech.unilearntech.payload.response.VideoResponse;
 import com.unilearntech.unilearntech.repository.UserRepository;
 import com.unilearntech.unilearntech.repository.VideoRepository;
 import com.unilearntech.unilearntech.service.encoding.VideoEncodingService;
 import com.unilearntech.unilearntech.service.user.UserDetailsImpl;
 import com.unilearntech.unilearntech.utils.activemq.VideoEncodingEvent;
 import com.unilearntech.unilearntech.utils.encrption.EncryptionUtils;
+import com.unilearntech.unilearntech.utils.string.StringUtils;
 import com.unilearntech.unilearntech.utils.video.VideoUtils;
-import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +37,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,11 +61,25 @@ public class FileStoreServiceImpl implements FileStoreService {
     @Autowired VideoEncodingService videoEncodingService;
 
 
+    @Override public FileStatusResponse getFileStatus(FileStatusReqeust reqeust) {
+        FileStatusResponse response = new FileStatusResponse();
+        if(StringUtils.isBlank(reqeust.getRequestId())){
+            response.addError(new Error("Invaild Request id."));
+            response.setSuccessful(false);
+        }else {
+            VideoEncodingSyncStatus videoEncodingSyncStatus = videoEncodingService.getVideoEncodingStatus(reqeust.getRequestId());
+            response.setStatus(videoEncodingSyncStatus);
+            response.setSuccessful(true);
+        }
+        return response;
+    }
+
     @Override
     public void encode(VideoEncodingEvent videoEncodingEvent) {
         Thread thread = new Thread(new encode(videoEncodingEvent));
         thread.start();
     }
+
 
     private class encode implements  Runnable{
         private  final  VideoEncodingEvent videoEncodingEvent;
@@ -78,15 +99,16 @@ public class FileStoreServiceImpl implements FileStoreService {
 
         public void runVideoEncoding(VideoEncodingEvent videoEncodingEvent){
             Video video = new Video();
-            VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO = videoEncodingService.getVideoEncodingStatus(videoEncodingEvent.getRequestId());
-            videoEncodingSyncStatusDTO.setSyncExecutionStatus(Channel.SyncExecutionStatus.RUNNING);
-            videoEncodingService.updateVideoEncodingStatus(videoEncodingSyncStatusDTO);
+            VideoEncodingSyncStatus videoEncodingSyncStatus = videoEncodingService.getVideoEncodingStatus(videoEncodingEvent.getRequestId());
+            videoEncodingSyncStatus.setSyncExecutionStatus(VideoEncodingStatus.SyncExecutionStatus.RUNNING);
+            videoEncodingService.updateVideoEncodingStatus(videoEncodingSyncStatus);
             String finalVideoUrl = null;
             try {
                 finalVideoUrl = encodeVideo(videoEncodingEvent);
                 String finalVideoThumbnailUrl = generateThumbnail(videoEncodingEvent);
-                videoEncodingSyncStatusDTO.setSyncExecutionStatus(Channel.SyncExecutionStatus.IDLE);
-                videoEncodingService.updateVideoEncodingStatus(videoEncodingSyncStatusDTO);
+                videoEncodingSyncStatus.setSyncExecutionStatus(VideoEncodingStatus.SyncExecutionStatus.IDLE);
+                videoEncodingService.updateVideoEncodingStatus(videoEncodingSyncStatus);
+                video.setVideoName(videoEncodingEvent.getVideoName());
                 video.setVideoSize(videoEncodingEvent.getVideoSize());
                 video.setVideoDuration(videoEncodingEvent.getVideoDuration());
                 video.setEnable(true);
@@ -269,49 +291,49 @@ public class FileStoreServiceImpl implements FileStoreService {
     }
 
     @Override
-    public ResponseEntity<?> storeAndEncodeFile(MultipartFile inputVideo) {
-        logger.info("storeAndEncodeFile method called for inpute file :"+inputVideo.getOriginalFilename());
-        Video video = new Video();
-        String finalVideoUrl = null;
-        String videoName = inputVideo.getOriginalFilename().replaceAll("\\s+", "");;
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String userName = userDetails.getUsername();
-        Optional<User> user = userRepository.findByUsername(userName);
-        DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-        Date date = new Date();
-        String dateInString = dateFormat.format(date);
-        String videoExt = FilenameUtils.getExtension(videoName);
-        Boolean supportedExtenstion = validateExtension(videoExt);
-
-        if(!supportedExtenstion) {
-            logger.info("Given file format is not suported :" + videoName);
-        } else {
+    public FileUploadResponse storeAndEncodeFile(MultipartFile inputVideo) {
+        FileUploadResponse response = new FileUploadResponse();
+        if(inputVideo.isEmpty()){
+            response.addError(new Error("Invaild file."));
+        } else if (!validateExtension(FilenameUtils.getExtension(inputVideo.getOriginalFilename()))){
+            response.addError(new Error("File extension is not vaild."));
+        }else{
+            logger.info("storeAndEncodeFile method called for inpute file :"+inputVideo.getOriginalFilename());
+            Video video = new Video();
+            String finalVideoUrl = null;
+            String videoName = inputVideo.getOriginalFilename().replaceAll("\\s+", "");;
+            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String userName = userDetails.getUsername();
+            Optional<User> user = userRepository.findByUsername(userName);
+            DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+            Date date = new Date();
+            String dateInString = dateFormat.format(date);
             File destinationFile = new File(processing_path, videoName);
             try {
                 inputVideo.transferTo(destinationFile);
                 logger.info("Given file transfer to processing path Successfully!!!");
                 VideoEncodingEvent videoEncodingEvent = new VideoEncodingEvent();
-                String modifiedVideoPath= processing_path+videoName;
-                logger.info("Original File name :"+videoName+" | File store path :"+modifiedVideoPath);
+                String modifiedVideoPath = processing_path + videoName;
+                logger.info("Original File name :" + videoName + " | File store path :" + modifiedVideoPath);
                 videoEncodingEvent.setVideoPath(modifiedVideoPath);
                 videoEncodingEvent.setUesrname(userName);
-                videoEncodingEvent.setVideoDuration(Double.parseDouble(VideoUtils.findLengthOfVideo(modifiedVideoPath).toString()));
+                videoEncodingEvent.setVideoDuration(
+                        Double.parseDouble(VideoUtils.findLengthOfVideo(modifiedVideoPath).toString()));
                 videoEncodingEvent.setVideoSize(inputVideo.getSize());
                 videoEncodingEvent.setVideoName(videoName);
                 videoEncodingEvent.setUser(user.get());
-
-                String requestId = EncryptionUtils.base64Encode(videoName+":"+userName+":"+dateInString);
-                VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO = videoEncodingService.getVideoEncodingStatus(requestId);
+                String requestId = EncryptionUtils.base64Encode(videoName + ":" + userName + ":" + dateInString);
+                VideoEncodingSyncStatus videoEncodingSyncStatus = videoEncodingService.getVideoEncodingStatus(requestId);
                 System.out.println(requestId);
+                response.setRequestId(requestId);
                 videoEncodingEvent.setRequestId(requestId);
-                if(Channel.SyncExecutionStatus.IDLE.equals(videoEncodingSyncStatusDTO.getSyncExecutionStatus())){
-                    videoEncodingSyncStatusDTO.setSyncExecutionStatus(Channel.SyncExecutionStatus.QUEUED);
-                    videoEncodingService.updateVideoEncodingStatus(videoEncodingSyncStatusDTO);
+                if (VideoEncodingStatus.SyncExecutionStatus.IDLE.equals(videoEncodingSyncStatus.getSyncExecutionStatus())) {
+                    videoEncodingSyncStatus.setSyncExecutionStatus(VideoEncodingStatus.SyncExecutionStatus.QUEUED);
+                    videoEncodingService.updateVideoEncodingStatus(videoEncodingSyncStatus);
                 }
                 String json = new Gson().toJson(videoEncodingEvent);
                 jmsTemplate.send("video-encode", new MessageCreator() {
-                    @Override
-                    public Message createMessage(Session session) throws JMSException {
+                    @Override public Message createMessage(Session session) throws JMSException {
                         TextMessage textMessage = session.createTextMessage();
                         textMessage.setText(json);
                         return textMessage;
@@ -321,22 +343,50 @@ public class FileStoreServiceImpl implements FileStoreService {
             catch (IOException e) {
                 e.printStackTrace();
             }
+            response.setMessage("Request Successfully Submitted.");
+            response.setSuccessful(true);
         }
-        return null;
+        return response;
     }
 
 
-    @Override public List<Video> fetchVideosByUser() {
+    @Override public GetVideoResponse fetchVideosByUser() {
+        GetVideoResponse response = new GetVideoResponse();
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String userName = userDetails.getUsername();
         Optional<User> user = userRepository.findByUsername(userName);
-
-        return videoRepository.findByUser_id(Long.parseLong(user.get().getId().toString()));
+        List<Video> videos=videoRepository.findByUser_id(Long.parseLong(user.get().getId().toString()));
+        ArrayList<VideoResponse> videoResponses = new ArrayList<VideoResponse>();
+        videos.stream().forEach(video -> {
+            VideoResponse videoResponse = new VideoResponse();
+            videoResponse.setVideoName(video.getVideoName());
+            videoResponse.setVideoSize(video.getVideoSize());
+            videoResponse.setVideoDuration(video.getVideoDuration());
+            videoResponse.setVidoeUrl(video.getVideoUrl());
+            videoResponse.setVideoThumbnailUrl(video.getThumbUrl());
+            videoResponses.add(videoResponse);
+        });
+        response.setVideos(videoResponses);
+        response.setSuccessful(true);
+        return response;
     }
 
-    @Override public List<Video> fetchVideos() {
-
-        return videoRepository.findAll();
+    @Override public GetVideoResponse fetchVideos() {
+        GetVideoResponse response = new GetVideoResponse();
+        List<Video> videos= videoRepository.findAll();
+        ArrayList<VideoResponse> videoResponses = new ArrayList<VideoResponse>();
+        videos.stream().forEach(video -> {
+            VideoResponse videoResponse = new VideoResponse();
+            videoResponse.setVideoName(video.getVideoName());
+            videoResponse.setVideoSize(video.getVideoSize());
+            videoResponse.setVideoDuration(video.getVideoDuration());
+            videoResponse.setVidoeUrl(video.getVideoUrl());
+            videoResponse.setVideoThumbnailUrl(video.getThumbUrl());
+            videoResponses.add(videoResponse);
+        });
+        response.setVideos(videoResponses);
+        response.setSuccessful(true);
+        return response;
     }
 
 

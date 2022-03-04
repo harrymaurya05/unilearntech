@@ -1,7 +1,7 @@
 package com.unilearntech.unilearntech.service.encoding;
 
 
-import com.unilearntech.unilearntech.models.VideoEncodingSyncStatusDTO;
+import com.unilearntech.unilearntech.models.VideoEncodingSyncStatus;
 import com.unilearntech.unilearntech.repository.VideoEncodingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,17 +13,17 @@ import org.springframework.stereotype.Service;
  class VideoEncodingServiceImpl implements  VideoEncodingService{
 
     @Autowired VideoEncodingRepository videoEncodingRepository;
-    @Override public VideoEncodingSyncStatusDTO save(VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO) {
-        return videoEncodingRepository.save(videoEncodingSyncStatusDTO);
+    @Override public VideoEncodingSyncStatus save(VideoEncodingSyncStatus videoEncodingSyncStatus) {
+        return videoEncodingRepository.save(videoEncodingSyncStatus);
     }
 
-    @Override public VideoEncodingSyncStatusDTO getVideoEncodingStatus(String requestId) {
+    @Override public VideoEncodingSyncStatus getVideoEncodingStatus(String requestId) {
         return videoEncodingRepository.getVideoEncodingSyncStatusDTO(requestId);
 
     }
 
-    @Override public VideoEncodingSyncStatusDTO updateVideoEncodingStatus(VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO) {
-        return videoEncodingRepository.updateVideoEncodingSyncStatusDTO(videoEncodingSyncStatusDTO);
+    @Override public VideoEncodingSyncStatus updateVideoEncodingStatus(VideoEncodingSyncStatus videoEncodingSyncStatus) {
+        return videoEncodingRepository.updateVideoEncodingSyncStatusDTO(videoEncodingSyncStatus);
     }
 
 }

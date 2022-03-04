@@ -1,12 +1,12 @@
 package com.unilearntech.unilearntech.service.encoding;
 
-import com.unilearntech.unilearntech.models.VideoEncodingSyncStatusDTO;
+import com.unilearntech.unilearntech.models.VideoEncodingSyncStatus;
 
 /**
  * Created by admin on 28/02/22.
  */
 public interface VideoEncodingService {
-    public VideoEncodingSyncStatusDTO save(VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO);
-    public VideoEncodingSyncStatusDTO getVideoEncodingStatus(String requestId);
-    public VideoEncodingSyncStatusDTO updateVideoEncodingStatus(VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO);
+    public VideoEncodingSyncStatus save(VideoEncodingSyncStatus videoEncodingSyncStatus);
+    public VideoEncodingSyncStatus getVideoEncodingStatus(String requestId);
+    public VideoEncodingSyncStatus updateVideoEncodingStatus(VideoEncodingSyncStatus videoEncodingSyncStatus);
 }

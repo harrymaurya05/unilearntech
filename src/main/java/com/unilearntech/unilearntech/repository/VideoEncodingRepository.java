@@ -1,7 +1,7 @@
 package com.unilearntech.unilearntech.repository;
 
 
-import com.unilearntech.unilearntech.models.VideoEncodingSyncStatusDTO;
+import com.unilearntech.unilearntech.models.VideoEncodingSyncStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -17,27 +17,27 @@ public class VideoEncodingRepository {
     private MongoOperations mongoOperations;
 
 
-    public VideoEncodingSyncStatusDTO save(VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO) {
-        mongoOperations.save(videoEncodingSyncStatusDTO);
-        return videoEncodingSyncStatusDTO;
+    public VideoEncodingSyncStatus save(VideoEncodingSyncStatus videoEncodingSyncStatus) {
+        mongoOperations.save(videoEncodingSyncStatus);
+        return videoEncodingSyncStatus;
     }
-    public VideoEncodingSyncStatusDTO getVideoEncodingSyncStatusDTO(String requestId){
-        VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO = fetch(requestId);
+    public VideoEncodingSyncStatus getVideoEncodingSyncStatusDTO(String requestId){
+        VideoEncodingSyncStatus videoEncodingSyncStatusDTO = fetch(requestId);
         if(videoEncodingSyncStatusDTO == null){
-            VideoEncodingSyncStatusDTO videoEncodingSyncStatus = new VideoEncodingSyncStatusDTO(requestId);
+            VideoEncodingSyncStatus videoEncodingSyncStatus = new VideoEncodingSyncStatus(requestId);
             videoEncodingSyncStatusDTO = updateVideoEncodingSyncStatusDTO(videoEncodingSyncStatus);
         }
         return  videoEncodingSyncStatusDTO;
     }
 
-    public VideoEncodingSyncStatusDTO updateVideoEncodingSyncStatusDTO(VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO){
-        return save(videoEncodingSyncStatusDTO);
+    public VideoEncodingSyncStatus updateVideoEncodingSyncStatusDTO(VideoEncodingSyncStatus videoEncodingSyncStatus){
+        return save(videoEncodingSyncStatus);
     }
 
-    public VideoEncodingSyncStatusDTO fetch(String requestId){
+    public VideoEncodingSyncStatus fetch(String requestId){
        return mongoOperations.findOne(new Query(
                         Criteria.where("requestId").is(requestId)),
-                VideoEncodingSyncStatusDTO.class);
+                VideoEncodingSyncStatus.class);
     }
 
 }

@@ -1,14 +1,11 @@
 package com.unilearntech.unilearntech.controllers;
 
-import com.unilearntech.unilearntech.models.User;
-import com.unilearntech.unilearntech.models.Video;
-import com.unilearntech.unilearntech.models.VideoEncodingSyncStatusDTO;
+import com.unilearntech.unilearntech.models.VideoEncodingSyncStatus;
 import com.unilearntech.unilearntech.repository.UserRepository;
 import com.unilearntech.unilearntech.repository.VideoRepository;
 import com.unilearntech.unilearntech.service.encoding.VideoEncodingService;
 import com.unilearntech.unilearntech.utils.encrption.EncryptionUtils;
 import java.io.IOException;
-import java.util.Optional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
@@ -17,9 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,17 +45,17 @@ public class TestController {
 	@GetMapping("/hari")
 	public String testing() throws IOException {
 
-		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
-
-        Video video = new Video(user.get(),30.526667,30.526667,"test",true,"test");
-        video.setUser(user.get());
-        video.setVideoUrl("test");
-        video.setThumbUrl("test");
-        video.setEnable(false);
-        video.setVideoDuration(233);
-        video.setVideoSize(new Long(2332));
-		videoRepository.save(video);
+//		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//		Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
+//
+//        Video video = new Video(user.get(),30.526667,30.526667,"test",true,"test");
+//        video.setUser(user.get());
+//        video.setVideoUrl("test");
+//        video.setThumbUrl("test");
+//        video.setEnable(false);
+//        video.setVideoDuration(233);
+//        video.setVideoSize(new Long(2332));
+//		videoRepository.save(video);
 
 //		final String TEST_PREFIX = "/Users/admin/Desktop/personal/javaProject/auth-server/src/main/resources/";
 //		final Locale locale = Locale.US;
@@ -137,8 +131,8 @@ public class TestController {
 
 	@GetMapping("/mongo")
 	public String addMongoData(){
-		VideoEncodingSyncStatusDTO videoEncodingSyncStatusDTO = new VideoEncodingSyncStatusDTO();
-		videoEncodingService.save(videoEncodingSyncStatusDTO);
+		VideoEncodingSyncStatus videoEncodingSyncStatus = new VideoEncodingSyncStatus();
+		videoEncodingService.save(videoEncodingSyncStatus);
 		return "Data Added";
 	}
 
