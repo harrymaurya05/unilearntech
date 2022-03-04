@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "d2bb8229-6ac3-4ea8-a075-61f4fcd778f0",
-		"name": "auth_server",
+		"_postman_id": "2eeaef63-3054-4783-86c4-3ea96fcae33b",
+		"name": "UniLearnTech",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -12,7 +12,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\":\"hariom\",\r\n    \"email\":\"xyz1@gmail.com\",\r\n    \"password\":\"password\",\r\n    \"role\":[\"ROLE_ADMIN\"]\r\n}",
+					"raw": "{\r\n    \"username\":\"hariom06\",\r\n    \"email\":\"xyz06@gmail.com\",\r\n    \"password\":\"password\",\r\n    \"role\":[\"ROLE_ADMIN\",\"ROLE_USER\"]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -20,11 +20,10 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/api/auth/signup",
+					"raw": "{{base.url}}/api/auth/signup",
 					"host": [
-						"localhost"
+						"{{base.url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"auth",
@@ -35,13 +34,27 @@
 			"response": []
 		},
 		{
-			"name": "signin",
+			"name": "Signin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"var token = \"Bearer \".concat(jsonData['accessToken']);",
+							"pm.environment.set(\"unilearntech_access_token\", token);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\":\"hariom\",\r\n    \"password\":\"password\"\r\n}",
+					"raw": "{\r\n    \"username\":\"hariom06\",\r\n    \"password\":\"password\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -49,15 +62,161 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/api/auth/signin",
+					"raw": "{{base.url}}/api/auth/signin",
 					"host": [
-						"localhost"
+						"{{base.url}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"auth",
 						"signin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload file",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{unilearntech_access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/admin/Desktop/personal/javaProject/sampleVideos/file_example_MP4_1920_18MG.mp4"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base.url}}/api/file/upload",
+					"host": [
+						"{{base.url}}"
+					],
+					"path": [
+						"api",
+						"file",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all Vides by User",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{unilearntech_access_token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{base.url}}/api/file/user/videos",
+					"host": [
+						"{{base.url}}"
+					],
+					"path": [
+						"api",
+						"file",
+						"user",
+						"videos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all Videos",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{unilearntech_access_token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{base.url}}/api/file/all/videos",
+					"host": [
+						"{{base.url}}"
+					],
+					"path": [
+						"api",
+						"file",
+						"all",
+						"videos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Testing Url",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{unilearntech_access_token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{base.url}}/api/test/create/job",
+					"host": [
+						"{{base.url}}"
+					],
+					"path": [
+						"api",
+						"test",
+						"create",
+						"job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get video status",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{unilearntech_access_token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"requestId\":\"ZmlsZV9leGFtcGxlX01QNF8xOTIwXzE4TUcubXA0OmhhcmlvbTA2OjA0LU1hci0yMDIyIDIxOjAzOjAz\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base.url}}/api/file/status",
+					"host": [
+						"{{base.url}}"
+					],
+					"path": [
+						"api",
+						"file",
+						"status"
 					]
 				}
 			},
