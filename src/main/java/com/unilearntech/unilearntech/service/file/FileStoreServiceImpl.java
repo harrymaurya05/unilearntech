@@ -49,10 +49,10 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileStoreServiceImpl implements FileStoreService {
     private static final Logger logger = LoggerFactory.getLogger(FileStoreServiceImpl.class);
-    private static final String baseUrl = "http://192.168.64.2/hls/";
+    private static final String baseUrl = "http://localhost:80/hls/";
     private static final String baseUrlSuffix = "/video/master.m3u8";
-    private static final String video_path= "/Users/admin/.bitnami/stackman/machines/xampp/volumes/root/htdocs/hls/";
-    private static final String processing_path = "/Users/admin/.bitnami/stackman/machines/xampp/volumes/root/htdocs/videoProcessing/";
+    private static final String video_path= "/Users/admin/Desktop/personal/opensource/hls/";
+    private static final String processing_path = "/Users/admin/Desktop/personal/opensource/videoProcessing/";
     private static final String ffmpeg="ffmpeg ";
     private  static final String thumbnailFileType = "jpg";
     @Autowired UserRepository userRepository;

@@ -1,6 +1,5 @@
 package com.unilearntech.unilearntech.controllers;
 
-import com.unilearntech.unilearntech.models.VideoEncodingSyncStatus;
 import com.unilearntech.unilearntech.repository.UserRepository;
 import com.unilearntech.unilearntech.repository.VideoRepository;
 import com.unilearntech.unilearntech.service.encoding.VideoEncodingService;
@@ -131,9 +130,13 @@ public class TestController {
 
 	@GetMapping("/mongo")
 	public String addMongoData(){
-		VideoEncodingSyncStatus videoEncodingSyncStatus = new VideoEncodingSyncStatus();
-		videoEncodingService.save(videoEncodingSyncStatus);
-		return "Data Added";
+		String username="account@unicommerce.com";
+		String password = "UCunicom#@!";
+		String  TOKEN_SALT   = "superSecret";
+		String  DELIMITER    = ":";
+		String data = username + DELIMITER + password;
+		System.out.println(EncryptionUtils.md5Encode(data, TOKEN_SALT));
+		return "done";
 	}
 
 	@GetMapping("/thread")
