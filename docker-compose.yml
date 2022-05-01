@@ -18,6 +18,8 @@ services:
     image: rmohr/activemq
   mongo-standalone:
     image: mongo:latest
+    ports:
+      - 27017
   nginx-standalone:
     image: nginx
     volumes:
@@ -44,6 +46,5 @@ services:
       - .m2:/root/.m2
     stdin_open: true
     tty: true
-
 volumes:
   db:
