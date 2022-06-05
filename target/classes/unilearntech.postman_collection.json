@@ -77,6 +77,20 @@
 		},
 		{
 			"name": "Upload file",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"var requestId = jsonData['requestId'];",
+							"pm.environment.set(\"requestId\", requestId);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [
@@ -190,6 +204,17 @@
 		},
 		{
 			"name": "get video status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [
@@ -201,7 +226,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"requestId\":\"ZmlsZV9leGFtcGxlX01QNF8xOTIwXzE4TUcubXA0OmhhcmlvbTA2OjA0LU1hci0yMDIyIDIxOjAzOjAz\"\n}",
+					"raw": "{\n    \"requestId\":\"{{requestId}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"

@@ -84,7 +84,7 @@ public class FileStoreServiceImpl implements FileStoreService {
     private class encode implements  Runnable{
         private  final  VideoEncodingEvent videoEncodingEvent;
 
-        public encode(VideoEncodingEvent videoEncodingEvent){
+        public encode(VideoEncodingEvent    videoEncodingEvent){
             this.videoEncodingEvent = videoEncodingEvent;
         }
         @Override
